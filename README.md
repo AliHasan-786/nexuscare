@@ -1,36 +1,27 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nexus Clinical Intelligence (NCI)
+### Post-Acute Risk Stratification & Clinical Logic Engine
 
-## Getting Started
+Nexus Clinical Intelligence (NCI) is a high-fidelity intelligence layer designed to solve the "unstructured data problem" in post-acute care and skilled nursing facilities (SNFs).
 
-First, run the development server:
+In typical senior living environments, critical early-warning signs of patient decline (sundowning, appetite loss, mobility refusal) are trapped in unstructured nurse shift notes. NCI standardizes these observations into discrete, queryable logic signals, enabling Accountable Care Organizations (ACOs) and value-based care providers to stratify risk at scale.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🧬 Architectural Focus: Clinical Logic Extraction
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Unlike basic NLP "summarizers," NCI is designed for **Analytical Precision**:
+*   **Normalization Hub**: Converts messy clinical shorthand (e.g., *"Pt A/O x1 only. Intake <25%. fatigue ↑."*) into standardized boolean flags and risk deltas.
+*   **Structured Rationale**: Every risk adjustment is accompanied by a system-generated logic rationale, providing clinicians with the "Why" behind the "What."
+*   **Normalized SQL Schema**: A relational Postgres architecture optimized for clinical trajectory analysis and cross-facility demographic benchmarking.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack
+*   **Frontend**: Next.js 15+ (App Router), TypeScript, Tailwind CSS v4.
+*   **Data Layer**: Supabase (Postgres) with specialized schemas for clinical assessments.
+*   **Intelligence Layer**: LLM-integrated logic stratification engine.
+*   **Visualization**: Recharts for 48-hour clinical trajectory mapping.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 Key Demonstrations
+*   **Population Health Analytics**: Built to standardize observations across a multi-facility cohort.
+*   **Risk Mitigation**: Proactive identification of subtle decline markers before they escalate into hospitalizations.
+*   **Operational Efficiency**: Eliminates manual chart review for care coordinators by surfaced standardized risk signals.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+*Developed for the intersection of Healthcare Intelligence and Data Engineering.*

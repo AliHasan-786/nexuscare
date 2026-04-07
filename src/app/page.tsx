@@ -38,15 +38,19 @@ export default function Dashboard() {
 
   const fetchPatients = async () => {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('patients')
-      .select('*')
-      .order('current_risk_score', { ascending: false })
-    
-    if (!error && data) {
-      setPatients(data)
+    try {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('*')
+        .order('current_risk_score', { ascending: false })
+      
+      if (error) throw error
+      if (data) setPatients(data)
+    } catch (err) {
+      console.error("Database Connection Failed:", err)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   useEffect(() => {
@@ -97,10 +101,20 @@ export default function Dashboard() {
     )
   }
 
+  // 1. Check for Missing Configuration (Safety for Vercel Deployments)
+  const isMissingConfig = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
+
+  if (isMissingConfig) {
+    return <MissingConfigState />
+  }
+
   if (loading && patients.length === 0) {
     return (
       <div className="flex h-screen items-center justify-center bg-background text-foreground">
-        <Loader2 className="animate-spin h-8 w-8 opacity-50" />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="animate-spin h-8 w-8 text-primary" />
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground animate-pulse">Syncing with Clinical Database...</p>
+        </div>
       </div>
     )
   }
@@ -352,6 +366,39 @@ function EmptyState({ onInit, seeding }: any) {
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+function MissingConfigState() {
+  return (
+    <div className="flex h-screen items-center justify-center bg-background p-6">
+      <Card className="max-w-md border-rose-500/20 bg-rose-500/5">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/10 text-rose-500">
+            <AlertCircle className="h-6 w-6" />
+          </div>
+          <CardTitle className="text-xl font-bold uppercase tracking-tight">Configuration Required</CardTitle>
+          <CardDescription className="text-xs uppercase tracking-widest text-rose-500/70">Deployment Protocol Interrupted</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4 text-center">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            The **Clinical Intelligence Hub** requires a secure connection to Supabase and OpenAI to function.
+          </p>
+          <div className="rounded border border-rose-500/20 bg-background p-4 text-left text-[11px] font-mono leading-tight text-muted-foreground">
+            <p className="mb-2 text-foreground font-bold underline">Final Step for Recruiter Demo:</p>
+            <ol className="list-decimal space-y-1 pl-4">
+              <li>Open Vercel Dashboard</li>
+              <li>Settings → Environment Variables</li>
+              <li>Add: `NEXT_PUBLIC_SUPABASE_URL`</li>
+              <li>Add: `NEXT_PUBLIC_SUPABASE_ANON_KEY`</li>
+              <li>Add: `OPENAI_API_KEY`</li>
+            </ol>
+          </div>
+          <p className="text-[10px] text-muted-foreground italic">
+            Once keys are added, redeploy or refresh this page.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }

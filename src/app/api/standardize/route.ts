@@ -71,15 +71,13 @@ export async function POST(req: Request) {
 
     if (assessmentError) throw new Error(`Assessment insert error: ${assessmentError.message}`)
 
-    // 3. Update patient's current risk score
-    const currentRisk = note.patients?.current_risk_score || 0
-    const newRiskScore = Math.min(100, currentRisk + result.risk_score_delta)
-    let status: 'stable' | 'monitoring' | 'critical' = 'stable'
-    if (newRiskScore >= 70) status = 'critical'
-    else if (newRiskScore >= 30) status = 'monitoring'
+    // 3. Update Patient Risk Score
+    const patientData = note.patients as any
+    const newRiskScore = Math.min(100, (patientData?.current_risk_score || 0) + (result.risk_score_delta || 0))
+    const status = newRiskScore >= 70 ? 'critical' : newRiskScore >= 30 ? 'monitoring' : 'stable'
 
-    const { error: updateError } = await supabase
-      .from('patients')
+    const { error: updateError } = await (supabase
+      .from('patients') as any)
       .update({
         current_risk_score: newRiskScore,
         status: status
@@ -89,7 +87,7 @@ export async function POST(req: Request) {
     if (updateError) throw new Error(`Patient update error: ${updateError.message}`)
 
     // 4. Mark note as processed
-    await supabase.from('shift_notes').update({ ai_processed: true } as any).eq('id', noteId)
+    await (supabase.from('shift_notes') as any).update({ ai_processed: true } as any).eq('id', noteId)
 
     return NextResponse.json({ success: true, result })
   } catch (error: any) {

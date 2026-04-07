@@ -49,12 +49,12 @@ export default function PatientDetail({ params }: { params: Promise<{ id: string
   const fetchData = async () => {
     setLoading(true)
     // 1. Fetch Patient
-    const { data: p, error: pError } = await supabase.from('patients').select('*').eq('id', id).single()
+    const { data: p, error: pError } = await (supabase.from('patients') as any).select('*').eq('id', id).single()
     if (!pError && p) setPatient(p)
 
     // 2. Fetch Notes and Assessments
-    const { data: n, error: nError } = await supabase
-      .from('shift_notes')
+    const { data: n, error: nError } = await (supabase
+      .from('shift_notes') as any)
       .select('*, standardized_assessments(*)')
       .eq('patient_id', id)
       .order('timestamp', { ascending: false })

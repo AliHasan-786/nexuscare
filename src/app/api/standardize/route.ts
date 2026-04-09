@@ -9,10 +9,14 @@ if (!openaiApiKey) {
 }
 const openai = new OpenAI({ 
   apiKey: openaiApiKey || 'placeholder-key',
-  baseURL: "https://openrouter.ai/api/v1"
+  baseURL: "https://openrouter.ai/api/v1",
+  maxRetries: 3,
+  timeout: 30000, // 30 second timeout
 })
 
 export async function POST(req: Request) {
+  console.log("--- Nexus Standardization Protocol Started ---")
+  console.log("Key Fragment:", openaiApiKey ? `${openaiApiKey.substring(0, 12)}...` : "MISSING")
   try {
     const { noteId } = await req.json()
     if (!noteId) throw new Error('No note ID provided.')
@@ -24,38 +28,48 @@ export async function POST(req: Request) {
       .eq('id', noteId)
       .single()
 
-    if (noteError || !data) throw new Error(`Note fetch error: ${noteError?.message}`)
+    if (noteError || !data) {
+      console.error("SUPABASE DATA FETCH FAILED:", noteError?.message || "No data found")
+      throw new Error(`Note fetch error: ${noteError?.message}`)
+    }
     
-    // Cast to any to handle complex Postgrest join types in this prototype
+    console.log("Supabase Data Fetched Successfully for noteId:", noteId)
     const note = data as any
 
-    // 1. Process with LLM
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: "You are a senior clinical analyst for a Medicare Advantage ACO. Your job is to extract high-risk markers from messy clinical shorthand. Focus on Evidence and Rationale. Respond ONLY with valid JSON."
-        },
-        {
-          role: "user",
-          content: `Analyze this clinical note: "${note.raw_text}"
-          
-          Schema Requirement:
+    // 1. Process with Raw Fetch to OpenRouter
+    console.log("Dispatching Raw Fetch to OpenRouter...")
+    const rawResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${openaiApiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "http://localhost:3000",
+        "X-Title": "Nexus Clinical Intelligence"
+      },
+      body: JSON.stringify({
+        model: "openai/gpt-4o-mini",
+        messages: [
           {
-            "cognitive_decline": boolean,
-            "appetite_loss": boolean,
-            "mobility_change": boolean,
-            "risk_score_delta": integer,
-            "clinical_evidence": string (Strict medical evidence found in text),
-            "logic_rationale": string (Analytical reasoning for the risk score change. e.g., 'Infection risk ↑ due to cognitive decline + poor intake')
-          }`
-        }
-      ],
-      response_format: { type: "json_object" }
+            role: "system",
+            content: "You are a senior clinical analyst for a Medicare Advantage ACO. Your job is to extract high-risk markers from messy clinical shorthand. Respond ONLY with valid JSON."
+          },
+          {
+            role: "user",
+            content: `Analyze this clinical note: "${note.raw_text}"\n\nSchema: {cognitive_decline: boolean, appetite_loss: boolean, mobility_change: boolean, risk_score_delta: number, clinical_evidence: string, logic_rationale: string}`
+          }
+        ],
+        response_format: { type: "json_object" }
+      })
     })
 
-    const result = JSON.parse(response.choices[0].message.content!)
+    if (!rawResponse.ok) {
+      const errorText = await rawResponse.text()
+      console.error("OPENROUTER API REJECTED REQUEST:", errorText)
+      throw new Error(`OpenRouter Error: ${rawResponse.status} - ${errorText}`)
+    }
+
+    const json = await rawResponse.json()
+    const result = json.choices[0].message.content ? JSON.parse(json.choices[0].message.content) : {}
 
     // 2. Insert into standardized_assessments
     const { error: assessmentError } = await supabase
@@ -90,9 +104,13 @@ export async function POST(req: Request) {
     // 4. Mark note as processed
     await (supabase.from('shift_notes') as any).update({ ai_processed: true } as any).eq('id', noteId)
 
+    console.log("OpenRouter Response Received Successfully")
     return NextResponse.json({ success: true, result })
   } catch (error: any) {
-    console.error("Standardization API error:", error)
+    console.error("CRITICAL API ERROR:", error.message)
+    if (error.response) {
+      console.error("OpenRouter Error Details:", error.response.data)
+    }
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

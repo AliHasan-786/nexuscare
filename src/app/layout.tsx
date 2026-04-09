@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Fira_Code } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -31,6 +32,13 @@ export default function RootLayout({
         <main className="flex-1">
           {children}
         </main>
+        <Toaster position="bottom-right" richColors toastOptions={{
+          style: {
+            background: 'var(--card)',
+            color: 'var(--foreground)',
+            border: '1px solid var(--border)',
+          },
+        }} />
       </body>
     </html>
   );

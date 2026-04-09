@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 import { Database } from "@/types/database"
+import { toast } from "sonner"
 import { 
   Activity, 
   AlertCircle, 
@@ -59,13 +60,27 @@ export default function Dashboard() {
 
   const handleInitialize = async () => {
     setSeeding(true)
+    const toastId = toast.loading("Initializing Clinical Protocol...", {
+      description: "Generating patient registry and synthesizing shift logs."
+    })
+
     try {
       const res = await fetch('/api/seed', { method: 'POST' })
       if (res.ok) {
+        toast.success("Simulation Protocols Loaded", {
+          id: toastId,
+          description: "48-hour clinical trajectory ingested successfully."
+        })
         await fetchPatients()
+      } else {
+        throw new Error("Seeding failed")
       }
     } catch (err) {
       console.error(err)
+      toast.error("Protocol Initialization Failed", {
+        id: toastId,
+        description: "Verify Supabase connection and try again."
+      })
     } finally {
       setSeeding(false)
     }

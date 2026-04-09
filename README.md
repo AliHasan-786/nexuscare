@@ -1,27 +1,27 @@
 # Nexus Clinical Intelligence (NCI)
-### Post-Acute Risk Stratification & Clinical Logic Engine
+### A Post-Acute Risk Stratification & Clinical Data Engineering Hub
 
-Nexus Clinical Intelligence (NCI) is a high-fidelity intelligence layer designed to solve the "unstructured data problem" in post-acute care and skilled nursing facilities (SNFs).
+Nexus Clinical Intelligence is a high-fidelity intelligence layer designed to solve the "unstructured data problem" in post-acute care and skilled nursing facilities (SNF). 
 
-In typical senior living environments, critical early-warning signs of patient decline (sundowning, appetite loss, mobility refusal) are trapped in unstructured nurse shift notes. NCI standardizes these observations into discrete, queryable logic signals, enabling Accountable Care Organizations (ACOs) and value-based care providers to stratify risk at scale.
+In value-based care environments, subtle indicators of patient decline are often buried in provider shift notes. NCI standardizes this messy data into queryable logic signals, allowing organizations to manage population risk deltas with clinical precision.
 
-## 🧬 Architectural Focus: Clinical Logic Extraction
+## 🧬 Core Logic: Extraction vs. Paraphrasing
+NCI focuses on **Evidence Extraction** rather than simple summarization:
+- **Clinical Data Normalization**: High-fidelity extraction of Cognitive, Metabolic, and Physical flags from raw logs.
+- **Analytical Rationale**: Every risk adjustment is linked to a system-generated logic rationale based on medical evidence.
+- **Risk Trajectory Hud**: A visual 48-hour longitudinal delta map that identifies compounding risks before they lead to avoidable hospitalizations.
 
-Unlike basic NLP "summarizers," NCI is designed for **Analytical Precision**:
-*   **Normalization Hub**: Converts messy clinical shorthand (e.g., *"Pt A/O x1 only. Intake <25%. fatigue ↑."*) into standardized boolean flags and risk deltas.
-*   **Structured Rationale**: Every risk adjustment is accompanied by a system-generated logic rationale, providing clinicians with the "Why" behind the "What."
-*   **Normalized SQL Schema**: A relational Postgres architecture optimized for clinical trajectory analysis and cross-facility demographic benchmarking.
+## 🛠️ Senior Architecture & Resiliency
+This project is built with production-grade patterns to ensure data integrity and user confidence:
+- **Resilient UI**: Integrated Next.js `loading.tsx` skeletons and global `error.tsx` boundaries to handle asynchronous clinical data streams gracefully.
+- **Verified Logic**: Core clinical risk calculations and status determination logic are protected by a **Vitest unit testing suite**.
+- **Real-time Feedback**: Global state awareness via `sonner` toast notifications for all standardization and seeding operations.
+- **Data Architecture**: Normalized Postgres schema (Supabase) designed for cohort-level longitudinal studies and population health benchmarking.
 
-## 🛠️ Tech Stack
-*   **Frontend**: Next.js 15+ (App Router), TypeScript, Tailwind CSS v4.
-*   **Data Layer**: Supabase (Postgres) with specialized schemas for clinical assessments.
-*   **Intelligence Layer**: LLM-integrated logic stratification engine.
-*   **Visualization**: Recharts for 48-hour clinical trajectory mapping.
-
-## 🚀 Key Demonstrations
-*   **Population Health Analytics**: Built to standardize observations across a multi-facility cohort.
-*   **Risk Mitigation**: Proactive identification of subtle decline markers before they escalate into hospitalizations.
-*   **Operational Efficiency**: Eliminates manual chart review for care coordinators by surfaced standardized risk signals.
+## 🚀 Simulation Protocol
+1. **Launch Simulation**: Click the high-contrast "Launch Protocol" CTA to initialize the 48-hour clinical sandbox.
+2. **Registry Analysis**: Deep-dive into patient registries where subtle decline (e.g., sundowning or intake loss) has been standardized.
+3. **Verify Intelligence**: Trigger the Clinical Intelligence Engine on individual notes to see the Extraction-to-Rationale pipeline in action.
 
 ---
 *Developed for the intersection of Healthcare Intelligence and Data Engineering.*

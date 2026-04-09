@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import OpenAI from 'openai'
+import { calculateNewRiskScore, determinePatientStatus } from '@/lib/clinical-utils'
 
 const openaiApiKey = process.env.OPENAI_API_KEY
 if (!openaiApiKey) {
@@ -73,8 +74,8 @@ export async function POST(req: Request) {
 
     // 3. Update Patient Risk Score
     const patientData = note.patients as any
-    const newRiskScore = Math.min(100, (patientData?.current_risk_score || 0) + (result.risk_score_delta || 0))
-    const status = newRiskScore >= 70 ? 'critical' : newRiskScore >= 30 ? 'monitoring' : 'stable'
+    const newRiskScore = calculateNewRiskScore(patientData?.current_risk_score || 0, result.risk_score_delta || 0)
+    const status = determinePatientStatus(newRiskScore)
 
     const { error: updateError } = await (supabase
       .from('patients') as any)

@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react"
 import { supabase } from "@/lib/supabase"
 import { Database } from "@/types/database"
+import { toast } from "sonner"
 import { 
   ArrowLeft, 
   Activity, 
@@ -69,6 +70,10 @@ export default function PatientDetail({ params }: { params: Promise<{ id: string
 
   const handleStandardize = async (noteId: string) => {
     setProcessing(noteId)
+    const toastId = toast.loading("Standardizing Clinical Data...", {
+      description: "Extracting evidence and calculating risk deltas."
+    })
+
     try {
       const res = await fetch('/api/standardize', {
         method: 'POST',
@@ -76,10 +81,20 @@ export default function PatientDetail({ params }: { params: Promise<{ id: string
         body: JSON.stringify({ noteId })
       })
       if (res.ok) {
+        toast.success("Clinical Extraction Complete", {
+          id: toastId,
+          description: "Data normalized and risk stratification updated."
+        })
         await fetchData()
+      } else {
+        throw new Error("Standardization failed")
       }
     } catch (err) {
       console.error(err)
+      toast.error("Extraction Protocol Failure", {
+        id: toastId,
+        description: "Verify LLM API configuration and retry."
+      })
     } finally {
       setProcessing(null)
     }
